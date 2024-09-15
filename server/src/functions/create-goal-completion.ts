@@ -25,7 +25,7 @@ export async function createGoalCompletion({
         and(
           gte(goalCompletions.createdAt, firstDayOfWeek),
           lte(goalCompletions.createdAt, lastDayOfWeek),
-          eq(goalCompletions.id, goalId)
+          eq(goalCompletions.goalId, goalId)
         )
       )
       .groupBy(goalCompletions.goalId)
@@ -35,10 +35,9 @@ export async function createGoalCompletion({
     .with(goalCompletionCounts)
     .select({
       desiredWeeklyFrequency: goals.desiredWeeklyFrequency,
-      completionCount:
-        sql`COALESCE(${goalCompletionCounts.completionCount}, 0)`.mapWith(
-          Number
-        ),
+      completionCount: sql`
+        COALESCE(${goalCompletionCounts.completionCount}, 0)
+      `.mapWith(Number),
     })
     .from(goals)
     .leftJoin(goalCompletionCounts, eq(goalCompletionCounts.goalId, goals.id))
